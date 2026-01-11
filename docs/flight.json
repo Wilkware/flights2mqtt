@@ -1,0 +1,21 @@
+{
+    "latitude": 43.5667,
+    "longitude": 16.1707,
+    "id": "3dd5f953",
+    "icao24bit": "4D20BF",
+    "heading": 18,
+    "altitude": 36000,
+    "groundSpeed": 455,
+    "squawk": "undefined",
+    "aircraftCode": "A21N",
+    "registration": "9H-WMK",
+    "time": 1767975859,
+    "originAirportIata": "NAP",
+    "destinationAirportIata": "WAW",
+    "number": "W41458",
+    "airlineIata": "W4",
+    "onGround": 0,
+    "verticalSpeed": 0,
+    "callsign": "WMT723",
+    "airlineIcao": "WZZ"
+}

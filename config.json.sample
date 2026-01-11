@@ -1,0 +1,15 @@
+{
+    "mqtt": {
+        "broker": "mqtt://127.0.0.1",
+        "port": 1883,
+        "topic": "flights/muc",
+        "clientId": "flights2mqtt"
+    },
+    "tracking": {
+        "latitude": 48.353802,
+        "longitude": 11.7861,
+        "radius": 50,
+        "airport": "MUC",
+        "interval": 300000
+    }
+}

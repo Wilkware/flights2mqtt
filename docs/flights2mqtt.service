@@ -1,0 +1,17 @@
+[Unit]
+Description=flights2mqtt
+[Service]
+ExecStart=/opt/flights2mqtt/index.js
+Restart=always
+User=pi
+Group=pi
+Environment=PATH=/usr/bin:/usr/local/bin
+Environment=NODE_ENV=production
+Environment=DEBUG=flights2mqtt:*
+WorkingDirectory=/opt/flights2mqtt
+# Output to syslog
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=f2m
+[Install]
+WantedBy=multi-user.target

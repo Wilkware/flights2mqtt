@@ -1,0 +1,33 @@
+{
+    "name": "flights2mqtt",
+    "version": "1.0.0",
+    "description": "Flight tracking to MQTT service",
+    "main": "index.js",
+    "scripts": {
+        "postinstall": "echo Install abgeschlossen",
+        "start": "node index.js"
+    },
+    "author": {
+        "name": "Wilkware",
+        "email": "heiko.wilknitz@wilkware.de"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Wilkware/flights2mqtt/issues"
+    },
+    "homepage": "https://github.com/Wilkware/flights2mqtt#readme",
+    "dependencies": {
+        "flightradarapi": "^1.0.0",
+        "mqtt": "^5.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Wilkware/flights2mqtt.git"
+    },
+    "keywords": [
+        "flightradar24",
+        "mqtt",
+        "flights",
+        "tracking"
+    ]
+}
