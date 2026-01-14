@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-// flights2mqtt - Flight Tracking to MQTT Service
+// *** flights2mqtt - Flight Tracking to MQTT Service **************************
 const { FlightRadar24API } = require('flightradarapi');
 const mqtt = require('mqtt');
 const fs = require('fs');
 const path = require('path');
+const airports = require('./airports.json');
 
-// ==================== CONFIGURATION ====================
+// ==================== CONFIGURATION ==========================================
 let CONFIG;
 try {
     const configPath = path.join(__dirname, 'config.json');
@@ -19,10 +20,10 @@ try {
     process.exit(1);
 }
 
-// ==================== FLIGHT RADAR API ====================
+// ==================== FLIGHT RADAR API =======================================
 const flightRadar = new FlightRadar24API();
 
-// ==================== MQTT CLIENT ====================
+// ==================== MQTT CLIENT ============================================
 let mqttClient = null;
 
 function connectMQTT() {
@@ -47,7 +48,7 @@ function connectMQTT() {
     });
 }
 
-// ==================== FLIGHT TRACKING ====================
+// ==================== FLIGHT TRACKING ========================================
 async function getFlightsInArea() {
     try {
         console.log('\n--- Fetching flights ---');
@@ -166,12 +167,14 @@ function extractFlightData(airport, flight, details) {
         departure: {
             city: details.airport.origin.position.region.city || 'N/A',
             iata: details.airport.origin.code.iata || 'N/A',
-            icao: details.airport.origin.code.icao || 'N/A'
+            icao: details.airport.origin.code.icao || 'N/A',
+            flag: airports[details.airport.origin.code.icao] || 'none'
         },
         arrival: {
             city: details.airport.destination.position.region.city || 'N/A',
             iata: details.airport.destination.code.iata || 'N/A',
-            icao: details.airport.destination.code.icao || 'N/A'
+            icao: details.airport.destination.code.icao || 'N/A',
+            flag: airports[details.airport.destination.code.icao] || 'N/A'
         },
         scheduled: {
             departure: details.time.scheduled.departure || 'N/A',
@@ -207,7 +210,7 @@ function publishFlightData(flightData) {
     });
 }
 
-// ==================== MAIN LOOP ====================
+// ==================== MAIN LOOP ==============================================
 function startTracking() {
     console.log('\n========================================');
     console.log('  flights2mqtt - Flight Tracker Started');
@@ -225,7 +228,7 @@ function startTracking() {
     }, CONFIG.tracking.interval);
 }
 
-// ==================== STARTUP ====================
+// ==================== STARTUP ================================================
 async function main() {
     // Connect to MQTT
     connectMQTT();
