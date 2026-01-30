@@ -53,19 +53,68 @@ sudo systemctl status flights2mqtt.service
 
 ## Konfiguration
 
-flights2mqtt verwendet zwei verschiedene Konfigurationsdateien.
+Die Anwendung wird über eine JSON-Konfigurationsdatei (config.json) gesteuert.
 
-Die erste ist `config.json`, welche die Einstellungen für die Verbindung zum MQTT-Broker enthält.
+Beispiel __config.json__
+
+```json
+{
+    "mqtt": {
+        "broker": "mqtt://127.0.0.1",
+        "port": 1883,
+        "topic": "flights/muc",
+        "clientId": "flights2mqtt"
+    },
+    "tracking": {
+        "latitude": 48.353802,
+        "longitude": 11.7861,
+        "radius": 50,
+        "airport": "MUC",
+        "interval": 300
+    }
+}
+```
 
 ### Einrichtung von config.json:
 
 ```
 cp config.json.sample config.json
 ```
-Bearbeite die `config.json` und trage die Einstellungen deines MQTT-Brokers und die Tracking Daten ein. Speichere die Datei anschließend.
+Bearbeite die __config.json__ und trage die Einstellungen deines MQTT-Brokers und die Tracking Daten ein. Speichere die Datei anschließend.
 ```
 nano config.json
 ```
+
+#### MQTT-Konfiguration
+
+Der Abschnitt __mqtt__ definiert die Verbindung zum MQTT-Broker sowie das Topic, in dem die Flugdaten veröffentlicht werden.
+
+| Feld       | Typ    | Beschreibung                                        |
+| ---------- | ------ | --------------------------------------------------- |
+| `broker`   | String | Adresse des MQTT-Brokers (z. B. `mqtt://localhost`) |
+| `port`     | Number | Port des MQTT-Brokers (Standard: `1883`)            |
+| `topic`    | String | MQTT-Topic für die Veröffentlichung der Flugdaten   |
+| `clientId` | String | Eindeutige Client-ID für die MQTT-Verbindung        |
+
+#### Tracking-Konfiguration
+
+Der Abschnitt __tracking__ definiert das geografische Suchgebiet und das Abfrageintervall.
+
+| Feld        | Typ    | Beschreibung                                      |
+| ----------- | ------ | ------------------------------------------------- |
+| `latitude`  | Number | Breitengrad des Zentrums der Tracking-Zone        |
+| `longitude` | Number | Längengrad des Zentrums der Tracking-Zone         |
+| `radius`    | Number | Radius der Tracking-Zone in **Kilometern**        |
+| `airport`   | String | ICAO- oder IATA-Code des Flughafens (z. B. `MUC`) |
+| `interval`  | Number | Aktualisierungsintervall in **Sekunden**          |
+
+__Besonderheit: airport-Filter__  
+Ist airport gesetzt (z. B. MUC), werden nur Flüge berücksichtigt, die diesen Flughafen als Start- oder Zielflughafen haben.  
+Ist airport leer ("") oder nicht gesetzt, erfolgt keine Filterung nach An- oder Abflughafen.
+In diesem Fall werden alle Flüge innerhalb des definierten Radius erfasst.
+
+__Beispiel:__  
+Mit den oben gezeigten Werten werden alle Flugzeuge im Umkreis von 50 km um den Flughafen München (MUC) alle 300 Sekunden abgefragt und per MQTT veröffentlicht.
 
 ### Direktes starten von flights2mqtt
 

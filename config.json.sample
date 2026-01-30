@@ -10,6 +10,6 @@
         "longitude": 11.7861,
         "radius": 50,
         "airport": "MUC",
-        "interval": 300000
+        "interval": 300
     }
 }

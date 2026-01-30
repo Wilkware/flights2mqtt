@@ -54,7 +54,13 @@ async function getFlightsInArea() {
         console.log('\n--- Fetching flights ---');
         console.log(`Area: ${CONFIG.tracking.latitude}, ${CONFIG.tracking.longitude}`);
         console.log(`Radius: ${CONFIG.tracking.radius}km`);
-        console.log(`Airport: ${CONFIG.tracking.airport}`);
+        console.log(`Airport: ${CONFIG.tracking.airport || 'None'}`);
+
+        // Create a reference point entity for distance calculation
+        const position = {
+            latitude: CONFIG.tracking.latitude,
+            longitude: CONFIG.tracking.longitude
+        };
 
         // Get bounds for the area
         const bounds = getBounds(
@@ -68,8 +74,10 @@ async function getFlightsInArea() {
         const flights = await flightRadar.getFlights(null, boundsString);
         console.log(`Found ${flights.length} flights in area`);
 
-        // Airport info
-        const airport = await flightRadar.getAirport(CONFIG.tracking.airport);
+        // Airport info (optional)
+        const airport = CONFIG.tracking.airport
+            ? await flightRadar.getAirport(CONFIG.tracking.airport)
+            : null;
 
         // Filter flights by airport and enrich with details
         const filteredFlights = [];
@@ -80,8 +88,10 @@ async function getFlightsInArea() {
             const origin = flight.originAirportIata || '';
             const destination = flight.destinationAirportIata || '';
 
-            const matches = origin === CONFIG.tracking.airport ||
-                destination === CONFIG.tracking.airport;
+            // If no airport is specified, allow all flights.
+            const matches = airport === null
+                || origin === CONFIG.tracking.airport
+                || destination === CONFIG.tracking.airport;
 
             // Log flights that don't match with full details
             if (!matches) {
@@ -96,12 +106,13 @@ async function getFlightsInArea() {
             }
         }
 
-        console.log(`${filteredFlights.length} flights match airport ${CONFIG.tracking.airport}`);
+        if (airport)
+            console.log(`${filteredFlights.length} flights match airport ${CONFIG.tracking.airport}`);
 
         // Process and publish each flight
         for (const flight of filteredFlights) {
             const details = await flightRadar.getFlightDetails(flight);
-            const data = extractFlightData(airport, flight, details);
+            const data = extractFlightData(position, airport, flight, details);
             // console.log(data);
             publishFlightData(data);
         }
@@ -144,7 +155,7 @@ function extractFlightInfo(flight) {
 }
 
 // Extract relevant flight Data
-function extractFlightData(airport, flight, details) {
+function extractFlightData(position, airport, flight, details) {
     return {
         flight: flight.number || 'NaN',
         callsign: details.identification.callsign || 'N/A',
@@ -159,7 +170,7 @@ function extractFlightData(airport, flight, details) {
             registration: flight.registration || 'N/A',
         },
         airline: {
-            name: details.airline.name ||'N/A',
+            name: details.airline.name || 'N/A',
             short: details.airline.short || 'N/A',
             iata: details.airline.code.iata || 'N/A',
             icao: details.airline.code.icao || 'N/A'
@@ -186,7 +197,7 @@ function extractFlightData(airport, flight, details) {
         },
         altitude: flight.altitude || 0,
         speed: flight.groundSpeed || 0,
-        distance: flight.getDistanceFrom(airport),
+        distance: airport ? flight.getDistanceFrom(airport) : flight.getDistanceFrom(position),
         timestamp: new Date().toISOString()
     };
 }
@@ -205,7 +216,7 @@ function publishFlightData(flightData) {
         if (error) {
             console.error(`Failed to publish ${flightData.flight}:`, error.message);
         } else {
-            console.log(`✓ Published: ${flightData.flight} (${flightData.departure} → ${flightData.arrival})`);
+            console.log(`✓ Published: ${flightData.flight} (${flightData.departure.city} → ${flightData.arrival.city})`);
         }
     });
 }
@@ -215,8 +226,8 @@ function startTracking() {
     console.log('\n========================================');
     console.log('  flights2mqtt - Flight Tracker Started');
     console.log('========================================');
-    console.log(`Interval: ${CONFIG.tracking.interval / 1000} seconds`);
-    console.log(`Target Airport: ${CONFIG.tracking.airport}`);
+    console.log(`Interval: ${CONFIG.tracking.interval } seconds`);
+    console.log(`Target Airport: ${CONFIG.tracking.airport || 'None'}`);
     console.log('========================================\n');
 
     // Initial fetch
@@ -225,7 +236,7 @@ function startTracking() {
     // Set up interval
     setInterval(() => {
         getFlightsInArea();
-    }, CONFIG.tracking.interval);
+    }, CONFIG.tracking.interval * 1000);
 }
 
 // ==================== STARTUP ================================================
